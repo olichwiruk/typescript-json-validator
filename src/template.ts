@@ -157,15 +157,13 @@ export const VALIDATE_IMPLEMENTATION = `export function validate(typeName: strin
   const validator: any = ajv.getSchema(\`Schema#/definitions/\${type}\`);
   return (value: unknown): any => {
     if (!validator) {
-      throw new Error(\`No validator defined for Schema#/definitions/\${typeName}\`)
+      throw \`No validator defined for Schema#/definitions/\${type}\`
     }
-  
+
     const valid = validator(value);
 
     if (!valid) {
-      throw new Error(
-        'Invalid ' + typeName + ': ' + ajv.errorsText(validator.errors!.filter((e: any) => e.keyword !== 'if'), {dataVar: typeName}),
-      );
+      throw \`Invalid \${typeName}: \${ajv.errorsText(validator.errors!.filter((e: any) => e.keyword !== 'if'), {dataVar: typeName})}\`;
     }
 
     return value as any;
