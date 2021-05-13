@@ -23,7 +23,9 @@ export const DECLARE_KOA_CONTEXT = `export interface KoaContext {
 }`;
 
 export const importNamedTypes = (names: string[], relativePath: string) =>
-  `import {${names.join(', ')}} from '${relativePath}';`;
+  `import {${names
+    .map(n => n.split('.')[0])
+    .join(', ')}} from '${relativePath}';`;
 export const importDefaultType = (name: string, relativePath: string) =>
   `import ${name} from '${relativePath}';`;
 export const importType = (
@@ -45,12 +47,18 @@ export const declareAJV = (options: Ajv.Options) =>
 ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
 `;
 
-export const exportNamed = (names: string[]) => `export {${names.join(', ')}};`;
+export const exportNamed = (names: string[]) =>
+  `export {${names.map(n => n.split('.')[0]).join(', ')}};`;
 
 export const declareSchema = (name: string, schema: TJS.Definition) =>
   `export const ${name} = ${stringify(schema, {space: 2})};`;
 
 export const addSchema = (name: string) => `ajv.addSchema(${name}, '${name}')`;
+
+export const addTypeNameDict = (names: string[]) =>
+  `const typeNameDict: Record<string, string> = {${names.map(
+    n => n.split('.')[0] + ': "' + n + '"',
+  )}};`;
 
 export const DECLARE_VALIDATE_TYPE = `export type ValidateFunction<T> = ((data: unknown) => data is T) & Pick<Ajv.ValidateFunction, 'errors'>`;
 export const validateType = (typeName: string) =>
@@ -141,9 +149,12 @@ export const VALIDATE_KOA_REQUEST_IMPLEMENTATION = `export function validateKoaR
 }`;
 
 export const validateOverload = (typeName: string) =>
-  `export function validate(typeName: '${typeName}'): (value: unknown) => ${typeName};`;
+  `export function validate(typeName: '${
+    typeName.split('.')[0]
+  }'): (value: unknown) => ${typeName.split('.')[0]};`;
 export const VALIDATE_IMPLEMENTATION = `export function validate(typeName: string): (value: unknown) => any {
-  const validator: any = ajv.getSchema(\`Schema#/definitions/\${typeName}\`);
+  const type = typeNameDict[typeName];
+  const validator: any = ajv.getSchema(\`Schema#/definitions/\${type}\`);
   return (value: unknown): any => {
     if (!validator) {
       throw new Error(\`No validator defined for Schema#/definitions/\${typeName}\`)

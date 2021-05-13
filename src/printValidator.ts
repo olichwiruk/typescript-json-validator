@@ -33,6 +33,7 @@ export function printTypeCollectionValidator(
     t.exportNamed(symbols),
     t.declareSchema('Schema', schema),
     t.addSchema('Schema'),
+    t.addTypeNameDict(symbols),
     ...koaTypes.map(s => t.validateKoaRequestOverload(s, schema)),
     ...(koaTypes.length
       ? [t.VALIDATE_KOA_REQUEST_FALLBACK, t.VALIDATE_KOA_REQUEST_IMPLEMENTATION]
